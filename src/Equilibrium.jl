@@ -25,7 +25,7 @@ function rho(::QDSimUtilities.Method"TNPI", units::QDSimUtilities.Units, sys::QD
         nsites = size(sys.Hamiltonian, 1)
 
         idmat = Matrix(1.0I, nsites, nsites)
-        At, _ = ComplexTNPI.A_of_t(; Hamiltonian=sys.Hamiltonian, β=bath.β, t=0.0, N=sim.nsteps, Jw=bath.Jw, svec=bath.svecs, A=idmat, extraargs)
+        At, _ = ComplexTNPI.A_of_t(; Hamiltonian=sys.Hamiltonian, β=bath.β, t=0.0, N=sim.nsteps, Jw=bath.Jw, svec=get_svecs(bath), A=idmat, extraargs)
         Z = tr(At)
         Utilities.check_or_insert_value(data, "eqm_rho", real.(At / Z))
     end
@@ -60,7 +60,7 @@ function complex_time_correlation_function(::QDSimUtilities.Method"TNPI", units:
 
         idmat = Matrix(1.0I, nsites, nsites)
         @info "Calculating the partition function for normalization."
-        At, _ = ComplexTNPI.A_of_t(; Hamiltonian=sys.Hamiltonian, β=bath.β, t=0.0, N=sim.nsteps, Jw=bath.Jw, svec=bath.svecs, A=idmat, extraargs)
+        At, _ = ComplexTNPI.A_of_t(; Hamiltonian=sys.Hamiltonian, β=bath.β, t=0.0, N=sim.nsteps, Jw=bath.Jw, svec=get_svecs(bath), A=idmat, extraargs)
         norm_op = get(sim_node, "partition_function", "id")
         Z = real(tr(At * ParseInput.parse_operator(norm_op, sys.Hamiltonian)))
         @info "Partition function = $(Z)."
@@ -68,7 +68,7 @@ function complex_time_correlation_function(::QDSimUtilities.Method"TNPI", units:
         Utilities.check_or_insert_value(data, "eqm_rho", real.(At / tr(At)))
         A = ParseInput.parse_operator(sim_node["A"], sys.Hamiltonian)
         B = ParseInput.parse_operator(sim_node["B"], sys.Hamiltonian)
-        ts, corr, _ = ComplexTNPI.complex_correlation_function(; Hamiltonian=sys.Hamiltonian, β=bath.β, tfinal, dt=sim.dt, N=sim.nsteps, Jw=bath.Jw, svec=bath.svecs, A, B=[B], Z, verbose=true, extraargs, output=data, type_corr)
+        ts, corr, _ = ComplexTNPI.complex_correlation_function(; Hamiltonian=sys.Hamiltonian, β=bath.β, tfinal, dt=sim.dt, N=sim.nsteps, Jw=bath.Jw, svec=get_svecs(bath), A, B=[B], Z, verbose=true, extraargs, output=data, type_corr)
         
         ft = get(sim_node, "fourier_transform", false)
         if ft
@@ -102,7 +102,7 @@ function rho(::QDSimUtilities.Method"QuAPI", units::QDSimUtilities.Units, sys::Q
         nsites = size(sys.Hamiltonian, 1)
 
         idmat = Matrix(1.0I, nsites, nsites)
-        At, _ = ComplexQuAPI.A_of_t(; Hamiltonian=sys.Hamiltonian, β=bath.β, t=0.0, N=sim.nsteps, Jw=bath.Jw, svec=bath.svecs, A=idmat, extraargs, exec=QDSimUtilities.parse_exec(exec))
+        At, _ = ComplexQuAPI.A_of_t(; Hamiltonian=sys.Hamiltonian, β=bath.β, t=0.0, N=sim.nsteps, Jw=bath.Jw, svec=get_svecs(bath), A=idmat, extraargs, exec=QDSimUtilities.parse_exec(exec))
         Z = tr(At)
         Utilities.check_or_insert_value(data, "eqm_rho", real.(At / Z))
     end
@@ -136,7 +136,7 @@ function complex_time_correlation_function(::QDSimUtilities.Method"QuAPI", units
 
         idmat = Matrix(1.0I, nsites, nsites)
         @info "Calculating the partition function for normalization."
-        At, _ = ComplexQuAPI.A_of_t(; Hamiltonian=sys.Hamiltonian, β=bath.β, t=0.0, N=sim.nsteps, Jw=bath.Jw, svec=bath.svecs, A=idmat, extraargs)
+        At, _ = ComplexQuAPI.A_of_t(; Hamiltonian=sys.Hamiltonian, β=bath.β, t=0.0, N=sim.nsteps, Jw=bath.Jw, svec=get_svecs(bath), A=idmat, extraargs)
         norm_op = get(sim_node, "partition_function", "id")
         Z = real(tr(At * ParseInput.parse_operator(norm_op, sys.Hamiltonian)))
         @info "Partition function = $(Z)."
@@ -144,7 +144,7 @@ function complex_time_correlation_function(::QDSimUtilities.Method"QuAPI", units
         Utilities.check_or_insert_value(data, "eqm_rho", real.(At / tr(At)))
         A = ParseInput.parse_operator(sim_node["A"], sys.Hamiltonian)
         B = ParseInput.parse_operator(sim_node["B"], sys.Hamiltonian)
-        ts, corr, _ = ComplexQuAPI.complex_correlation_function(; Hamiltonian=sys.Hamiltonian, β=bath.β, tfinal, dt=sim.dt, N=sim.nsteps, Jw=bath.Jw, svec=bath.svecs, A, B=[B], Z, verbose=true, extraargs, output=data, type_corr)
+        ts, corr, _ = ComplexQuAPI.complex_correlation_function(; Hamiltonian=sys.Hamiltonian, β=bath.β, tfinal, dt=sim.dt, N=sim.nsteps, Jw=bath.Jw, svec=get_svecs(bath), A, B=[B], Z, verbose=true, extraargs, output=data, type_corr)
         ft = get(sim_node, "fourier_transform", false)
         if ft
             sig = vcat(reverse(conj.(corr[2:end])), corr)
@@ -187,7 +187,7 @@ function complex_time_correlation_function(::QDSimUtilities.Method"adaptive-kink
 
         idmat = Matrix(1.0I, nsites, nsites)
         @info "Calculating the partition function for normalization."
-        At, _ = ComplexQuAPI.adaptive_kink_A_of_t(; Hamiltonian=sys.Hamiltonian, β=bath.β, t=0.0, N=sim.nsteps, Jw=bath.Jw, svec=bath.svecs, A=idmat, extraargs)
+        At, _ = ComplexQuAPI.adaptive_kink_A_of_t(; Hamiltonian=sys.Hamiltonian, β=bath.β, t=0.0, N=sim.nsteps, Jw=bath.Jw, svec=get_svecs(bath), A=idmat, extraargs)
         norm_op = get(sim_node, "partition_function", "id")
         Z = real(tr(At * ParseInput.parse_operator(norm_op, sys.Hamiltonian)))
         @info "Partition function = $(Z)."
@@ -195,7 +195,7 @@ function complex_time_correlation_function(::QDSimUtilities.Method"adaptive-kink
         Utilities.check_or_insert_value(data, "eqm_rho", real.(At / tr(At)))
         A = ParseInput.parse_operator(sim_node["A"], sys.Hamiltonian)
         B = ParseInput.parse_operator(sim_node["B"], sys.Hamiltonian)
-        ts, corr, _ = ComplexQuAPI.adaptive_kink_complex_correlation_function(; Hamiltonian=sys.Hamiltonian, β=bath.β, tfinal, dt=sim.dt, N=sim.nsteps, Jw=bath.Jw, svec=bath.svecs, A, B=[B], Z, verbose=true, extraargs, output=data, type_corr)
+        ts, corr, _ = ComplexQuAPI.adaptive_kink_complex_correlation_function(; Hamiltonian=sys.Hamiltonian, β=bath.β, tfinal, dt=sim.dt, N=sim.nsteps, Jw=bath.Jw, svec=get_svecs(bath), A, B=[B], Z, verbose=true, extraargs, output=data, type_corr)
         ft = get(sim_node, "fourier_transform", false)
         if ft
             sig = vcat(reverse(conj.(corr[2:end])), corr)

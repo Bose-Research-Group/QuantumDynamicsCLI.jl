@@ -1,6 +1,7 @@
 module QDSimUtilities
 
 using FoldsThreads
+using LinearAlgebra
 using QuantumDynamics
 
 struct Method{method} end
@@ -31,8 +32,17 @@ end
 struct Bath
     β::Float64
     Jw::Vector{SpectralDensities.SpectralDensity}
-    svecs::Matrix{Float64}
+    sops::Vector{Matrix{Float64}}
+    # svecs::Matrix{Float64}
     num_osc::Union{Nothing,AbstractVector{<:Integer}}
+end
+function get_svecs(bath::Bath)
+    svecs = zeros(length(bath.Jw), size(bath.sops[1], 1))
+    for (b, sop) in enumerate(bath.sops)
+        @assert isdiag(sop) "System-bath coupling is not diagonal, cannot reduce to svecs."
+        svecs[b, :] = diag(sop)
+    end
+    svecs
 end
 
 function discretize(bath::Bath)

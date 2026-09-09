@@ -206,28 +206,37 @@ function parse_bath(baths, sys, unit)
         β = 1.0 / austrip(baths["temperature"] * uparse("K") * Unitful.k)
     end
     Jw = Vector{SpectralDensities.SpectralDensity}()
-    svecs = zeros(size(sys.Hamiltonian, 1), size(sys.Hamiltonian, 1))
+    sops = Vector{Matrix{Float64}}()
+    # svecs = zeros(size(sys.Hamiltonian, 1), size(sys.Hamiltonian, 1))
     btype = get(baths, "baths_type", "list")
     num_osc = Vector{Integer}()
     if btype == "list"
         svecs = zeros(length(baths["bath"]), size(sys.Hamiltonian, 1))
         for (nb, b) in enumerate(baths["bath"])
             push!(Jw, get_bath(b, unit))
-            svecs[nb, :] .= b["svec"]
+            # svecs[nb, :] .= b["svec"]
+            if haskey(b, "svec")
+                push!(sops, diagm(b["svec"]))
+            elseif haskey(b, "sop")
+                push!(sops, real.(parse_operator(b["sop"], sys.Hamiltonian)))
+            end
+            # @show sops[end]
             haskey(b, "num_osc") && push!(num_osc, b["num_osc"])
         end
     elseif btype == "site_based"
         bath = get_bath(baths["bath"][1], unit)
         nsites = sys.Htype == "nearest_neighbor_cavity" ? size(sys.Hamiltonian, 1) - 1 : size(sys.Hamiltonian, 1)
-        svecs = zeros(nsites, size(sys.Hamiltonian, 1))
+        # svecs = zeros(nsites, size(sys.Hamiltonian, 1))
         for nb = 1:nsites
             push!(Jw, bath)
-            svecs[nb, nb] = 1.0
+            # svecs[nb, nb] = 1.0
+            push!(sops, zeros(nsites, nsites))
+            sops[end][nb, nb] = 1.0
         end
         haskey(baths["bath"][1], "num_osc") &&
             (num_osc = fill(baths["bath"][1]["num_osc"], nsites))
     end
-    QDSimUtilities.Bath(β, Jw,svecs,(isempty(num_osc) ? nothing : num_osc))
+    QDSimUtilities.Bath(β, Jw, sops,(isempty(num_osc) ? nothing : num_osc))
 end
 
 function parse_system_bath(input_file)
@@ -237,7 +246,8 @@ function parse_system_bath(input_file)
     bath = parse_bath(input_dict["baths"], sys, unit)
     is_QuAPI = get(input_dict["system"], "is_QuAPI", true)
     if !is_QuAPI
-        sys.Hamiltonian .-= diagm(sum([SpectralDensities.reorganization_energy(j) * bath.svecs[nb, :] .^ 2 for (nb, j) in enumerate(bath.Jw)]))
+        sys.Hamiltonian .-= sum(SpectralDensities.reorganization_energy(j) * bath.sops[nb] ^ 2 for (nb, j) in enumerate(bath.Jw))
+        # sys.Hamiltonian .-= diagm(sum([SpectralDensities.reorganization_energy(j) * bath.svecs[nb, :] .^ 2 for (nb, j) in enumerate(bath.Jw)]))
     end
     unit, sys, bath
 end
