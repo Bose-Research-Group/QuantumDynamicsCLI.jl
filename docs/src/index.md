@@ -2,12 +2,12 @@
 
 | **Documentation** |
 |:-----------------:|
-|[![Dev](https://img.shields.io/badge/docs-dev-blue.svg)](https://amartyabose.github.io/QuantumDynamicsCLI.jl/dev/)|
+|[![Dev](https://img.shields.io/badge/docs-dev-blue.svg)](https://Bose-Research-Group.github.io/QuantumDynamicsCLI.jl/dev/)|
 
 ## What is QuantumDynamicsCLI?
 Simulating the dynamics of quantum systems is a challenging task with a
 multitude of complicated computational methods. The
-[QuantumDynamics.jl](https://github.com/amartyabose/QuantumDynamics.jl) package
+[QuantumDynamics.jl](https://github.com/Bose-Research-Group/QuantumDynamics.jl) package
 provides modular open-source implementations of an increasingly growing number
 of these methods, while remaining a flexible platform for further development.
 However, owing primarily to its exceptionally flexible nature, the usage of

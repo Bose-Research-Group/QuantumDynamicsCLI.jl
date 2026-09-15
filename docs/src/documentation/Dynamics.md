@@ -24,7 +24,7 @@ All of these dynamics methods require some core common parameters and then more 
 
 ## Specifying the initial reduced density matrix
 
-The simplest way to specify the initial density matrix is to set the `rho0` parameter to a file which will be parsed as a matrix. However, convenient shortcuts exist to specify most commonly used values of `rho0`, these are explained in the documentation of [QuantumDynamicsCLI.ParseInput.parse_operator](@ref).
+The simplest way to specify the initial density matrix is to set the `rho0` parameter to a file which will be parsed as a matrix. However, convenient shortcuts exist to specify most commonly used values of `rho0`, these are explained in the documentation of [`QuantumDynamicsCLI.ParseInput.parse_operator`](@ref).
 
 ## Feynman-Vernon Influence Functional Simulations
 
