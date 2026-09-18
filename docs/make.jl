@@ -23,5 +23,5 @@ makedocs(;
     ]
 )
 deploydocs(
-    repo="github.com/amartyabose/QuantumDynamicsCLI.jl.git"
+    repo="github.com/Bose-Research-Group/QuantumDynamicsCLI.jl.git"
 )
