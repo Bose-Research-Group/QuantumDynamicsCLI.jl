@@ -441,8 +441,9 @@ function dynamics(::QDSimUtilities.Method"QCPI", units::QDSimUtilities.Units,
             flush(bin)
 
             @info "Calculating bin $n of $nbins"
-            _, ρs = QCPI.propagate(; Hamiltonian=sys.Hamiltonian, Jw=bath.Jw, solvent=hb, svec=bath.svecs, ρ0, ntimes=sim.nsteps, dt=sim.dt, classical_dt=sim.dt/10, kmax, reference_choice, extraargs=QuAPI.QuAPIArgs(), path_integral_routine=QuAPI.propagate, verbose=true)
+            _, ρs = QCPI.propagate(; Hamiltonian=sys.Hamiltonian, Jw=bath.Jw, solvent=hb, svec=sv, ρ0, ntimes=sim.nsteps, dt=sim.dt, classical_dt=sim.dt/10, kmax, reference_choice, extraargs=QuAPI.QuAPIArgs(), path_integral_routine=QuAPI.propagate, verbose=true)
             Utilities.check_or_insert_value(outgrouphdf5, "rho", ρs)
+            flush(outgrouphdf5)
         end
         flush(data)
     end
