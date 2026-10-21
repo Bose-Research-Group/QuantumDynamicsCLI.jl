@@ -443,7 +443,6 @@ function dynamics(::QDSimUtilities.Method"QCPI", units::QDSimUtilities.Units,
             @info "Calculating bin $n of $nbins"
             _, ρs = QCPI.propagate(; Hamiltonian=sys.Hamiltonian, Jw=bath.Jw, solvent=hb, svec=sv, ρ0, ntimes=sim.nsteps, dt=sim.dt, classical_dt=sim.dt/10, kmax, reference_choice, extraargs=QuAPI.QuAPIArgs(), path_integral_routine=QuAPI.propagate, verbose=true)
             Utilities.check_or_insert_value(outgrouphdf5, "rho", ρs)
-            flush(outgrouphdf5)
         end
         flush(data)
     end
@@ -504,7 +503,7 @@ function dynamics(::QDSimUtilities.Method"QC-HEOM", units::QDSimUtilities.Units,
 
             @info "Calculating bin $n of $nbins"
             time_taken = @elapsed begin
-                _, ρs = QCHEOM.propagate(; Hamiltonian=sys.Hamiltonian, Jw=bath.Jw, solvent=hb, sops=sys_ops, ρ0, β=bath.β, ntimes=sim.nsteps, dt=sim.dt, num_modes, Lmax, extraargs=Utilities.DiffEqArgs(; reltol, abstol), verbose=true)
+                _, ρs = QCHEOM.propagate(; Hamiltonian=sys.Hamiltonian, Jw=bath.Jw, solvent=hb, sops=sys_ops, ρ0, β=bath.β, ntimes=sim.nsteps, dt=sim.dt, tol=reltol, Lmax, extraargs=Utilities.DiffEqArgs(; reltol, abstol), verbose=true)
             end
             Utilities.check_or_insert_value(outgrouphdf5, "rho", ρs)
             Utilities.check_or_insert_value(outgrouphdf5, "time_taken", time_taken)
@@ -553,9 +552,9 @@ function dynamics(::QDSimUtilities.Method"HEOM", units::QDSimUtilities.Units, sy
         end
 
         @time _, ρs = if isnothing(sys.external_fields)
-            HEOM.propagate(; Hamiltonian, ρ0, sys_ops, Jw=bath.Jw, β=bath.β, num_modes, Lmax, dt=sim.dt, ntimes=sim.nsteps, L, extraargs=Utilities.DiffEqArgs(; reltol, abstol), decomposition=decomp_type, output=data, verbose=true)
+            HEOM.propagate(; Hamiltonian, ρ0, sys_ops, Jw=bath.Jw, β=bath.β, num_modes, Lmax, tol=reltol, dt=sim.dt, ntimes=sim.nsteps, L, extraargs=Utilities.DiffEqArgs(; reltol, abstol), decomposition=decomp_type, output=data, verbose=true)
         else
-            HEOM.propagate(; Hamiltonian, ρ0, sys_ops, Jw=bath.Jw, β=bath.β, num_modes, Lmax, dt=sim.dt, ntimes=sim.nsteps, L, external_fields=sys.external_fields, extraargs=Utilities.DiffEqArgs(; reltol, abstol), decomposition=decomp_type, output=data, verbose=true)
+            HEOM.propagate(; Hamiltonian, ρ0, sys_ops, Jw=bath.Jw, β=bath.β, num_modes, Lmax, tol=reltol, dt=sim.dt, ntimes=sim.nsteps, L, external_fields=sys.external_fields, extraargs=Utilities.DiffEqArgs(; reltol, abstol), decomposition=decomp_type, output=data, verbose=true)
         end
     end
     data
