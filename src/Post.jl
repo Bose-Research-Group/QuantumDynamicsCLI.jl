@@ -186,6 +186,30 @@ function calculate_print_observable(::QDSimUtilities.Calculation"complex_corr", 
     end
 end
 
+function calculate_print_observable(::QDSimUtilities.Calculation"equilibrium_rho", sys::QDSimUtilities.System, bath::QDSimUtilities.Bath, sim::QDSimUtilities.Simulation, units::QDSimUtilities.Units, sim_node)
+    out = h5open(sim.output, "r")
+    method_group = out["$(sim.name)/$(sim.calculation)/$(sim.method)"]
+    data_node = Simulate.calc(QDSimUtilities.Calculation(sim.calculation)(), sys, bath, sim, units, sim_node, method_group; dry=true)
+    obs_file = sim_node["observable_output"]
+    fname, ext = splitext(obs_file)
+    rho = read(data_node, "eqm_rho")
+    @info "Equilibrium density matrix: "
+    display(rho)
+    rholist = zeros(ComplexF64, 1, size(rho)...)
+    rholist[1, :, :] = rho
+
+    open("$(fname)$(ext)", "w") do io
+        for (os, obs) in enumerate(sim_node["observable"])
+            val = calculate_observable(sys, rholist, obs["observable"]; mat_type=get(obs, "type", "real"))
+            write(io, "$(obs["observable"]) = $(real(val[1]))\n")
+        end
+    end
+
+    open("$(fname)_rho$(ext)", "w") do io
+        writedlm(io, rho)
+    end
+end
+
 @cast function get_observable(system_input, simulate_input)
     QDSimUtilities.print_banner()
     units, sys, bath = ParseInput.parse_system_bath(system_input)
